@@ -240,14 +240,15 @@ namespace Alex.Worlds
 	                {
 		                //var cc = new ChunkCoordinates(CameraPosition);
 
+		                var camPos = new ChunkCoordinates(CameraPosition);
 		                var where = Enqueued.Where(x => IsWithinView(x, CameraBoundingFrustum)).ToArray();
 		                if (where.Length > 0)
 		                {
-			                coords = where.MinBy(x => Math.Abs(x.DistanceTo(new ChunkCoordinates(CameraPosition))));
+			                coords = where.Where(x => Math.Abs(x.DistanceTo(camPos)) <= radiusSquared).MinBy(x => Math.Abs(x.DistanceTo(new ChunkCoordinates(CameraPosition))));
 		                }
 		                else
 		                {
-			                coords = Enqueued.MinBy(x => Math.Abs(x.DistanceTo(new ChunkCoordinates(CameraPosition))));
+			                coords = Enqueued.Where(x => Math.Abs(x.DistanceTo(camPos)) <= radiusSquared).MinBy(x => Math.Abs(x.DistanceTo(camPos)));
 		                }
 
 		                if (!_workItems.ContainsKey(coords))
@@ -667,8 +668,15 @@ namespace Alex.Worlds
 			    camera.Position.Z));
 
             var renderedChunks = Chunks.ToArray().Where(x =>
-		    {
-			    var chunkPos = new Vector3(x.Key.X * ChunkColumn.ChunkWidth, 0, x.Key.Z * ChunkColumn.ChunkDepth);
+            {
+	            if (Math.Abs(x.Key.DistanceTo(cameraChunkPos)) > radiusSquared)
+	            {
+		           // if (_renderedChunks.Contains(x.Key))
+						x.Value.Unload();
+		            return false;
+	            }
+
+	            var chunkPos = new Vector3(x.Key.X * ChunkColumn.ChunkWidth, 0, x.Key.Z * ChunkColumn.ChunkDepth);
 			    return camera.BoundingFrustum.Intersects(new Microsoft.Xna.Framework.BoundingBox(chunkPos,
 				    chunkPos + new Vector3(ChunkColumn.ChunkWidth, 16 * ((x.Value.GetHeighest() >> 4) + 1),
 					    ChunkColumn.ChunkDepth)));

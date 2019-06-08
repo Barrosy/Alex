@@ -49,6 +49,8 @@ namespace Alex.API.World
 		void DrawTransparent(GraphicsDevice device, AlphaTestEffect effect, out int drawnIndices, out int indexSize);
 		
 		bool HasDirtySubChunks { get; }
+
+		void Unload();
 	}
 
 	[Flags]

@@ -1134,6 +1134,8 @@ namespace Alex.Worlds.Java
 		{
 			_dimension = packet.Dimension;
 
+			Log.Info($"Server render-distance: {packet.ViewDistance}");
+			
 			ClientSettingsPacket settings = new ClientSettingsPacket();
 			settings.ChatColors = true;
 			settings.ChatMode = 0;

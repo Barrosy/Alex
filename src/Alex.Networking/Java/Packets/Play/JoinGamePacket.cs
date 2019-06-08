@@ -12,9 +12,10 @@ namespace Alex.Networking.Java.Packets.Play
 		public int EntityId;
 		public byte Gamemode;
 		public int Dimension;
-		public byte Difficulty;
+		//public byte Difficulty;
 		//public byte MaxPlayers;
 		public string LevelType;
+		public int ViewDistance;
 		public bool ReducedDebugInfo;
 
 		public override void Decode(MinecraftStream stream)
@@ -22,9 +23,10 @@ namespace Alex.Networking.Java.Packets.Play
 			EntityId = stream.ReadInt();
 			Gamemode = (byte) stream.ReadByte();
 			Dimension = stream.ReadInt();
-			Difficulty = (byte) stream.ReadByte();
+			//Difficulty = (byte) stream.ReadByte();
 			stream.ReadByte();
 			LevelType = stream.ReadString();
+			ViewDistance = stream.ReadVarInt();
 			ReducedDebugInfo = stream.ReadBool();
 		}
 
@@ -33,9 +35,10 @@ namespace Alex.Networking.Java.Packets.Play
 			stream.WriteInt(EntityId);
 			stream.WriteByte(Gamemode);
 			stream.WriteInt(Dimension);
-			stream.WriteByte(Difficulty);
+			//stream.WriteByte(Difficulty);
 			stream.WriteByte(255);
 			stream.WriteString(LevelType);
+			stream.WriteVarInt(ViewDistance);
 			stream.WriteBool(ReducedDebugInfo);
 		}
 	}

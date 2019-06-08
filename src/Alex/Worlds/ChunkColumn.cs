@@ -1131,6 +1131,28 @@ namespace Alex.Worlds
 
 			private ChunkMeshCache[] _chunkMeshCache = null;
 
+			public void Unload()
+			{
+				for (var index = 0; index < SectionBuffers.Length; index++)
+				{
+					var chunksSection = SectionBuffers[index];
+					chunksSection?.Dispose();
+
+					SectionBuffers[index] = null;
+				}
+
+				if (_chunkMeshCache != null)
+				{
+					for (var index = 0; index < _chunkMeshCache.Length; index++)
+					{
+						var meshCache = _chunkMeshCache[index];
+						
+						meshCache?.Mesh.Dispose();
+						_chunkMeshCache = null;
+					}
+				}
+			}
+			
 			public void UpdateChunk(GraphicsDevice device, IWorld world)
 			{
 				var scheduled = Scheduled;
