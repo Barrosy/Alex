@@ -458,7 +458,7 @@ namespace Alex.Graphics.Models.Blocks
 		protected (VertexPositionNormalTextureColor[] vertices, int[] indexes) GetVertices(IWorld world, Vector3 position, IBlock baseBlock,
 			BlockStateModel[] models, IDictionary<string, FaceCache> faceCache)
 		{
-			var verts = new List<VertexPositionNormalTextureColor>(36);
+			var verts = new List<VertexPositionNormalTextureColor>(24 * models.Length);
 			var indexResult = new List<int>();
 			// MaxY = 0;
 			//Vector3 worldPosition = position;// new Vector3(position.X, position.Y, position.Z);
@@ -551,11 +551,6 @@ namespace Alex.Graphics.Models.Blocks
 						for (var index = 0; index < faceVertices.indexes.Length; index++)
 						{
 							var idx = faceVertices.indexes[index];
-							/*var vertex = faceVertices.vertices[idx];
-
-							vertex.Color = faceColor;
-							vertex.Position = position + vertex.Position;
-							verts.Add(vertex);*/
 							
 							indexResult.Add(initialIndex + idx);
 						}

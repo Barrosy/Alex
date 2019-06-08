@@ -14,7 +14,7 @@ namespace Alex.Blocks.Storage
 {
 	public class BlockStateContainer : IBlockStatePaletteResizer
 	{
-		private static NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger(typeof(BlockStateContainer));
+        private static NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger(typeof(BlockStateContainer));
 		private static readonly IBlockStatePalette RegistryBasedPalette = new BlockStatePaletteRegistry();
 		protected static IBlockState AirBlockState = BlockFactory.GetBlockState("minecraft:air");// new Air().GetDefaultState();
 		public FlexibleStorage Storage;
@@ -35,6 +35,7 @@ namespace Alex.Blocks.Storage
 		{
 			if (bitsIn != this._bits)
 			{
+			    var oldStorage = Storage;
 				this._bits = bitsIn;
 
 				if (this._bits <= 4)
@@ -206,8 +207,9 @@ namespace Alex.Blocks.Storage
 
 			int length = ms.ReadVarInt();
 
-			long[] data = new long[length];
-			for (int j = 0; j < length; j++)
+		    long[] data = new long[length]; //new long[length];
+
+            for (int j = 0; j < length; j++)
 			{
 				data[j] = ms.ReadLong();
 			}

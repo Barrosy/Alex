@@ -11,8 +11,10 @@ namespace Alex.API.World
 		int X { get; }
 		int Z { get; }
 
-		bool HighPriority { get; set; }
-
+        ChunkFlags Flags { get; set; }
+       // bool MarkedForGpu { get; set; }
+        bool HighPriority { get; set; }
+     //   bool NeedCleanup { get; set; }
 
         IBlockState GetBlockState(int x, int y, int z);
 		void SetBlockState(int x, int y, int z, IBlockState state);
@@ -28,12 +30,9 @@ namespace Alex.API.World
 		void SetSkyLight(int bx, int by, int bz, byte data);
 		Task<ChunkMesh> GenerateMeshes(IWorld world);
 		void UpdateChunk(GraphicsDevice device, IWorld world);
-		//ChunkMesh Mesh { get; set; }
-		VertexBuffer VertexBuffer { get; set; }
-		IndexBuffer IndexBuffer { get; set; }
-		VertexBuffer TransparentVertexBuffer { get; set; }
-		IndexBuffer TransparentIndexBuffer { get; set; }
-		object VertexLock { get; set; }
+	    void SendToGpu(GraphicsDevice device);
+
+        object VertexLock { get; set; }
 		object UpdateLock { get; set; }
 		bool IsDirty { get; set; }
 		bool SkyLightDirty { get; set; }
@@ -49,8 +48,11 @@ namespace Alex.API.World
 		void DrawTransparent(GraphicsDevice device, AlphaTestEffect effect, out int drawnIndices, out int indexSize);
 		
 		bool HasDirtySubChunks { get; }
+	 //   bool RamReady { get; }
+	    bool IsWallSectionSolid(int face, int y);
 
-		void Unload();
+	    void HandleFlags();
+
 	}
 
 	[Flags]

@@ -5,6 +5,7 @@ using Alex.API.World;
 using Alex.Blocks;
 using Alex.ResourcePackLib.Json;
 using Alex.Utils;
+using Alex.Worlds;
 using Microsoft.Xna.Framework;
 using BoundingBox = Microsoft.Xna.Framework.BoundingBox;
 
@@ -316,8 +317,8 @@ namespace Alex.Graphics.Models.Blocks
 					indexes = new int[0];
 					break;
 			}
-			
-			return new[]
+
+            return new[]
 			{
 				topLeft, topRight, bottomLeft, bottomRight
 			};

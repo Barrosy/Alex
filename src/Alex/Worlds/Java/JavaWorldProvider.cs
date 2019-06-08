@@ -351,6 +351,7 @@ namespace Alex.Worlds.Java
 
 		public void SpawnMob(int entityId, Guid uuid, EntityType type, PlayerLocation position, Vector3 velocity)
 		{
+		    return;
 			Entity entity = null;
 			if (EntityFactory.ModelByNetworkId((long) type, out var renderer, out EntityData knownData))
 			{
@@ -421,6 +422,7 @@ namespace Alex.Worlds.Java
 			if (renderer.Texture == null)
 			{
 				Log.Debug($"Missing texture for entity: {type.ToString()} ({(int) type})");
+                renderer.Dispose();
 				return;
 			}
 
@@ -1400,7 +1402,7 @@ namespace Alex.Worlds.Java
 			}
 
 			var cryptoProvider = AsnKeyBuilder.DecodePublicKey(packet.PublicKey);
-			Log.Info($"Crypto: {cryptoProvider == null} Pub: {packet.PublicKey} Shared: {SharedSecret}");
+			//Log.Info($"Crypto: {cryptoProvider == null} Pub: {packet.PublicKey} Shared: {SharedSecret}");
 			var encrypted = cryptoProvider.Encrypt(SharedSecret, RSAEncryptionPadding.Pkcs1);
 
 			EncryptionResponsePacket response = new EncryptionResponsePacket();

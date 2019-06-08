@@ -204,7 +204,7 @@ namespace Alex.GameStates.Playing
 					{
 						_previousMemUpdate = gameTime.TotalGameTime;
 						//Alex.Process.Refresh();
-						MemoryUsageDisplay = $"Allocated memory: {GetBytesReadable(Environment.WorkingSet)}";
+						MemoryUsageDisplay = $"Allocated memory: {GetBytesReadable(Environment.WorkingSet)}\nVertexBuffer Pool: {GetBytesReadable(VertexBufferPool.GetMemoryUsage)}";
 					}
 				}
 			}
@@ -402,7 +402,7 @@ namespace Alex.GameStates.Playing
 			}
 		}
 
-		private static string GetBytesReadable(long i)
+		public static string GetBytesReadable(long i)
 		{
 			// Get absolute value
 			long absolute_i = (i < 0 ? -i : i);

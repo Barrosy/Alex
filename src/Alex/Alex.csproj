@@ -7,7 +7,8 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
     <StartupObject>Alex.Program</StartupObject>
     <Platforms>AnyCPU;x64</Platforms>
-	  <RuntimeIdentifiers>win10-x64;ubuntu.16.10-x64</RuntimeIdentifiers>
+	  <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
+		<!-- <RuntimeIdentifiers>win10-x64;ubuntu.16.10-x64</RuntimeIdentifiers>-->
   </PropertyGroup>
 
   <PropertyGroup>

@@ -13,7 +13,7 @@ using NLog;
 
 namespace Alex.Graphics.Models.Entity
 {
-	public partial class EntityModelRenderer : Model
+	public partial class EntityModelRenderer : Model, IDisposable
 	{
 		private static readonly Logger Log = LogManager.GetCurrentClassLogger(typeof(EntityModelRenderer));
 
@@ -141,5 +141,18 @@ namespace Alex.Graphics.Models.Entity
 		{
 			return Model.Name;
 		}
+
+	    public void Dispose()
+	    {
+	        Texture?.Dispose();
+
+	        if (Bones != null)
+	        {
+	            foreach (var b in Bones)
+	            {
+	                b.Value?.Dispose();
+	            }
+	        }
+	    }
 	}
 }

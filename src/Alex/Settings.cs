@@ -16,9 +16,10 @@ namespace Alex
 	    public string Anvil { get; set; }
 		public bool UseBuiltinGenerator { get; set; }
 
-		public int ChunkThreads { get; set; } 
 		public bool ClientSideLighting { get; set; }
 		public bool UseAlexChunks { get; set; }
+
+        public PerformanceSettings Performance { get; set; }
         public Settings(string username)
         {
             Username = username;
@@ -33,9 +34,22 @@ namespace Alex
 	        UseBuiltinGenerator = false;
 	        IsDirty = false;
 
-	        ChunkThreads = 1;
 	        ClientSideLighting = true;
 	        UseAlexChunks = false;
+
+            Performance = new PerformanceSettings();
+        }
+
+        public sealed class PerformanceSettings
+        {
+            public bool AgressiveMemoryManagement { get; set; }
+            public int ChunkThreads { get; set; }
+
+            public PerformanceSettings()
+            {
+                AgressiveMemoryManagement = false;
+                ChunkThreads = Environment.ProcessorCount / 2;
+            }
         }
     }
 }
