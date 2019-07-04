@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Alex.API.Graphics;
 using Alex.API.Graphics.Textures;
 using Alex.API.Graphics.Typography;
@@ -10,6 +10,15 @@ namespace Alex.API.Gui.Graphics
 {
     public class GuiSpriteBatch : IDisposable
     {
+        private static readonly RasterizerState RasterizerState = GetDefaultRasterizerState();
+
+        private static RasterizerState GetDefaultRasterizerState()
+        {
+            var rast = CopyRasterizerState(RasterizerState.CullNone);
+            rast.ScissorTestEnable = true;
+            return rast;
+        }
+
         public IFont Font { get; set; }
         //public GraphicsContext Graphics { get; }
         public SpriteBatch SpriteBatch { get; }
@@ -20,6 +29,7 @@ namespace Alex.API.Gui.Graphics
         private readonly GraphicsDevice _graphicsDevice;
         private readonly IGuiRenderer _renderer;
         private Texture2D _colorTexture;
+        private Matrix _renderMatrix = Matrix.Identity;
 
         private bool _beginSpriteBatchAfterContext;
         private bool _hasBegun;
@@ -44,11 +54,30 @@ namespace Alex.API.Gui.Graphics
             return Vector2.Transform(screen, ScaledResolution.InverseTransformMatrix);
         }
 
+
+        public Rectangle Project(Rectangle rectangle)
+        {
+            var loc1 = Vector2.Transform(rectangle.Location.ToVector2(), ScaledResolution.TransformMatrix);
+            var loc2 = Vector2.Transform((rectangle.Location + rectangle.Size).ToVector2(), ScaledResolution.TransformMatrix);
+
+            var loc1p = new Point((int)Math.Floor(loc1.X), (int)Math.Floor(loc1.Y));
+            var loc2p = new Point((int)Math.Ceiling(loc2.X), (int)Math.Ceiling(loc2.Y));
+            var size = loc2p - loc1p;
+
+            return new Rectangle(loc1p, size);
+        }
+        public Rectangle Unproject(Rectangle screen)
+        {
+            var loc1 = Vector2.Transform(screen.Location.ToVector2(), ScaledResolution.InverseTransformMatrix).ToPoint();
+            var loc2 = Vector2.Transform((screen.Location + screen.Size).ToVector2(), ScaledResolution.InverseTransformMatrix).ToPoint();
+            return new Rectangle(loc1, loc2 - loc1);
+        }
+
         public void Begin()
         {
             if (_hasBegun) return;
 			
-            SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, ScaledResolution.TransformMatrix);
+            SpriteBatch.Begin(SpriteSortMode.Deferred, Context.BlendState, Context.SamplerState, Context.DepthStencilState, RasterizerState, null, ScaledResolution.TransformMatrix * _renderMatrix);
         
             _hasBegun = true;
 
@@ -76,12 +105,67 @@ namespace Alex.API.Gui.Graphics
             return context;
         }
 
+        public IDisposable BeginTransform(Matrix transformMatrix, bool mergeTransform = true)
+        {
+            var previousRenderMatrix = _renderMatrix;
+            if (mergeTransform)
+                _renderMatrix = _renderMatrix * transformMatrix;
+            else
+                _renderMatrix = transformMatrix;
+            
+            return new ContextDisposable(() => { _renderMatrix = previousRenderMatrix; });
+        }
+
+        public IDisposable BeginClipBounds(Rectangle scissorRectangle, bool mergeBounds = false)
+        {
+            //if (scissorRectangle == Rectangle.Empty) return new ContextDisposable(() => {});
+
+            var currentScissorRectangle = Context.ScissorRectangle;
+            
+            var rect = Project(scissorRectangle);
+            if (mergeBounds)
+                rect = Rectangle.Intersect(currentScissorRectangle, rect);
+
+            if (_hasBegun)
+            {
+                End();
+                Begin();
+            }
+
+            Context.ScissorRectangle = rect;
+            
+            return new ContextDisposable(() => {
+                if (_hasBegun)
+                {
+                    End();
+                    Begin();
+                }
+                Context.ScissorRectangle = currentScissorRectangle;
+            });
+        }
+
         private void OnGraphicsContextDisposed(object sender, EventArgs e)
         {
             if (_beginSpriteBatchAfterContext)
             {
                 Begin();
             }
+        }
+
+        private static RasterizerState CopyRasterizerState(RasterizerState rasterizerState)
+        {
+            return new RasterizerState()
+            {
+                CullMode = rasterizerState.CullMode,
+                DepthBias = rasterizerState.DepthBias,
+                DepthClipEnable = rasterizerState.DepthClipEnable,
+                FillMode = rasterizerState.FillMode,
+                MultiSampleAntiAlias = rasterizerState.MultiSampleAntiAlias,
+                Name = rasterizerState.Name,
+                ScissorTestEnable = rasterizerState.ScissorTestEnable,
+                SlopeScaleDepthBias = rasterizerState.SlopeScaleDepthBias,
+                Tag = rasterizerState.Tag
+            };
         }
 
         #endregion
@@ -316,7 +400,7 @@ namespace Alex.API.Gui.Graphics
             {
                 if (_colorTexture == null)
                 {
-                    _colorTexture = GpuResourceManager.GetTexture2D(this, _graphicsDevice, 1, 1, false, SurfaceFormat.Color);
+                    _colorTexture = GpuResourceManager.GetTexture2D(_graphicsDevice, 1, 1, false, SurfaceFormat.Color);
                     _colorTexture.SetData(new [] { Color.White });
                 }
 
@@ -333,5 +417,20 @@ namespace Alex.API.Gui.Graphics
         }
 
         #endregion
+    }
+
+    internal class ContextDisposable : IDisposable
+    {
+        private readonly Action _onDisposeAction;
+
+        public ContextDisposable(Action onDisposeAction)
+        {
+            _onDisposeAction = onDisposeAction;
+        }
+
+        public void Dispose()
+        {
+            _onDisposeAction?.Invoke();
+        }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Alex.API.Gui.Attributes;
 using Alex.API.Gui.Layout;
 using Microsoft.Xna.Framework;
 
@@ -24,7 +25,7 @@ namespace Alex.API.Gui.Elements
         private AutoSizeMode _autoSizeMode = AutoSizeMode.GrowOnly;
 
         [Obsolete("Please use the Margin.Left property instead!")]
-        public int X
+        [DebuggerVisible] public int X
         {
             set
             {
@@ -35,7 +36,7 @@ namespace Alex.API.Gui.Elements
         }
 
         [Obsolete("Please use the Margin.Top property instead!")]
-        public int Y
+        [DebuggerVisible] public int Y
         {
             set
             {
@@ -45,7 +46,7 @@ namespace Alex.API.Gui.Elements
             }
         }
 
-        public int Width
+        [DebuggerVisible] public int Width
         {
             get => _width;
             set
@@ -55,7 +56,7 @@ namespace Alex.API.Gui.Elements
             }
         }
 
-        public int Height
+        [DebuggerVisible] public int Height
         {
             get => _height;
             set
@@ -65,7 +66,7 @@ namespace Alex.API.Gui.Elements
             }
         }
 
-        public int MinWidth
+        [DebuggerVisible] public int MinWidth
         {
             get => _minWidth;
             set
@@ -75,7 +76,7 @@ namespace Alex.API.Gui.Elements
             }
         }
 
-        public int MaxWidth
+        [DebuggerVisible] public int MaxWidth
         {
             get => _maxWidth;
             set
@@ -85,7 +86,7 @@ namespace Alex.API.Gui.Elements
             }
         }
 
-        public int MinHeight
+        [DebuggerVisible] public int MinHeight
         {
             get => _minHeight;
             set
@@ -95,7 +96,7 @@ namespace Alex.API.Gui.Elements
             }
         }
 
-        public int MaxHeight
+        [DebuggerVisible] public int MaxHeight
         {
             get => _maxHeight;
             set
@@ -105,7 +106,7 @@ namespace Alex.API.Gui.Elements
             }
         }
 
-        public Thickness Padding
+        [DebuggerVisible] public Thickness Padding
         {
             get => _padding;
             set
@@ -115,7 +116,7 @@ namespace Alex.API.Gui.Elements
             }
         }
 
-        public Thickness Margin
+        [DebuggerVisible] public Thickness Margin
         {
             get => _margin;
             set
@@ -125,7 +126,7 @@ namespace Alex.API.Gui.Elements
             }
         }
 
-        public virtual AutoSizeMode AutoSizeMode
+        [DebuggerVisible] public virtual AutoSizeMode AutoSizeMode
         {
             get => _autoSizeMode;
             set
@@ -135,7 +136,7 @@ namespace Alex.API.Gui.Elements
             }
         }
 
-        public Alignment Anchor
+        [DebuggerVisible] public Alignment Anchor
         {
             get => _anchor;
             set
@@ -149,30 +150,30 @@ namespace Alex.API.Gui.Elements
 
         #region Layout Calculation State Properties
         
-        public bool IsSizeDirty { get; protected set; } = true;
-        public bool IsLayoutDirty    { get; protected set; } = true;
+        [DebuggerVisible] public bool IsSizeDirty { get; protected set; } = true;
+        [DebuggerVisible] public bool IsLayoutDirty    { get; protected set; } = true;
         
-        public bool IsMeasureComplete { get; protected set; } = false;
-        public bool IsArrangeComplete { get; protected set; } = false;
+        [DebuggerVisible] public bool IsMeasureComplete { get; protected set; } = false;
+        [DebuggerVisible] public bool IsArrangeComplete { get; protected set; } = false;
 
-        public int  LayoutOffsetX    { get; private set; }   = 0;
-        public int  LayoutOffsetY    { get; private set; }   = 0;
-        public int  LayoutWidth      { get; private set; }   = 0;
-        public int  LayoutHeight     { get; private set; }   = 0;
-        public Size PreferredSize    { get; private set; }
-        public Size PreferredMinSize { get; private set; }
-        public Size PreferredMaxSize { get; private set; }
+        [DebuggerVisible] public int  LayoutOffsetX    { get; private set; }   = 0;
+        [DebuggerVisible] public int  LayoutOffsetY    { get; private set; }   = 0;
+        [DebuggerVisible] public int  LayoutWidth      { get; private set; }   = 0;
+        [DebuggerVisible] public int  LayoutHeight     { get; private set; }   = 0;
+        [DebuggerVisible] public Size PreferredSize    { get; private set; }
+        [DebuggerVisible] public Size PreferredMinSize { get; private set; }
+        [DebuggerVisible] public Size PreferredMaxSize { get; private set; }
 
         #endregion
 
         #region Calculated Properties
 
-        public Rectangle Bounds      { get; private set; }
-        public Rectangle InnerBounds { get; private set; }
-        public Rectangle OuterBounds { get; private set; }
-        public Point     Position    { get; private set; }
-        public Size      Size        { get; private set; }
-	    public Size      ContentSize { get; private set; }
+        [DebuggerVisible] public Rectangle Bounds      { get; private set; }
+        [DebuggerVisible] public Rectangle InnerBounds { get; private set; }
+        [DebuggerVisible] public Rectangle OuterBounds { get; private set; }
+        [DebuggerVisible] public Point     Position    { get; private set; }
+        [DebuggerVisible] public Size      Size        { get; private set; }
+        [DebuggerVisible] public Size      ContentSize { get; private set; }
 
 		#endregion
 
@@ -278,11 +279,15 @@ namespace Alex.API.Gui.Elements
         {
             if (!IsMeasureComplete)
             {
+                OnBeforeMeasure();
+
                 UpdatePreferredSize();
 
                 var size = MeasureCore(availableSize - Margin);
 
                 Size = size;
+
+                OnAfterMeasure();
 
                 IsMeasureComplete = true;
             }
@@ -317,6 +322,7 @@ namespace Alex.API.Gui.Elements
             }
 
             size = Size.Clamp(size, PreferredMinSize, PreferredMaxSize);
+            size = Size.Clamp(size, size, availableSize);
 
             LayoutWidth  = size.Height;
             LayoutHeight = size.Width;
@@ -356,6 +362,8 @@ namespace Alex.API.Gui.Elements
                 }
             }
 
+            size = Size.Clamp(size, size, availableSize);
+
             var childSize = MeasureChildren(size);
 
             return Size.Max(size, childSize);
@@ -382,7 +390,21 @@ namespace Alex.API.Gui.Elements
                 size = Size.Max(size, childSize);
             }
 
+            if (size.Height > availableSize.Height)
+            {
+                size.Height = size.Height - availableSize.Height;
+            }
+
             return size;
+        }
+
+        protected virtual void OnBeforeMeasure()
+        {
+
+        }
+        protected virtual void OnAfterMeasure()
+        {
+
         }
 
         #endregion
@@ -393,6 +415,8 @@ namespace Alex.API.Gui.Elements
         {
             if (!IsArrangeComplete)
             {
+                OnBeforeArrange(newBounds);
+
                 OuterBounds = newBounds + Margin;
                 InnerBounds = newBounds - Padding;
                 Bounds      = newBounds;
@@ -404,9 +428,43 @@ namespace Alex.API.Gui.Elements
 
                 ArrangeCore(newBounds);
 
+                OnAfterArrange();
+
                 IsArrangeComplete = true;
             }
 
+        }
+
+        protected virtual void OnBeforeArrange(Rectangle newBounds)
+        {
+            if (this.TryFindParent(e => e.ClipToBounds, out var parentClip))
+            {
+                RenderBounds = Rectangle.Intersect(newBounds, parentClip.RenderBounds);
+                RenderSize = newBounds.Size;
+                RenderPosition = newBounds.Location.ToVector2();
+            }
+            else
+            {
+                RenderBounds = newBounds;
+                RenderSize = newBounds.Size;
+                RenderPosition = newBounds.Location.ToVector2();
+            }
+        }
+
+        protected virtual void OnAfterArrange()
+        {
+            //if (ParentElement != null && ClipToBounds)
+            //{
+            //    RenderBounds   = Rectangle.Intersect(Bounds, ParentElement.RenderBounds);
+            //    RenderSize     = RenderBounds.Size;
+            //    RenderPosition = RenderBounds.Location.ToVector2();
+            //}
+            //else
+            //{
+            //    RenderBounds   = Bounds;
+            //    RenderSize     = Size;
+            //    RenderPosition = Position.ToVector2();
+            //}
         }
 
         protected virtual void ArrangeCore(Rectangle newBounds)
@@ -425,8 +483,14 @@ namespace Alex.API.Gui.Elements
         {
             foreach (var child in children)
             {
-                PositionChild(child, child.Anchor, newBounds, Padding, Thickness.Zero);
+                if(ShouldPositionChild(child))
+                    PositionChild(child, child.Anchor, newBounds, Padding, Thickness.Zero);
             }
+        }
+
+        protected virtual bool ShouldPositionChild(GuiElement child)
+        {
+            return true;
         }
 
         protected LayoutBoundingRectangle PositionChild(GuiElement child,           Alignment alignment,
